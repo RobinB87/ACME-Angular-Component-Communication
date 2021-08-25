@@ -12,7 +12,7 @@ import { of } from "rxjs/observable/of";
 import { catchError, tap } from "rxjs/operators";
 
 import { IProduct } from "./product";
-import { Subject } from "rxjs";
+import { BehaviorSubject, Subject } from "rxjs";
 
 @Injectable()
 export class ProductService {
@@ -22,7 +22,16 @@ export class ProductService {
   // Subject is a specific type of observable which can notify various components
   // Encapsulate it to ensure other components cannot change it
   // Create a property which exposes the observable, which is read only
-  private selectedProductSource = new Subject<IProduct | null>();
+  // private selectedProductSource = new Subject<IProduct | null>();
+
+  // BehaviorSubject retains it last subscribed value
+  // So, after destroying a page and reinitialize
+  // (eg navigate to edit page and then navigate back),
+  // it still has its last value.
+
+  // It expects an initial value
+  // Set it to null, as no product is initially selected
+  private selectedProductSource = new BehaviorSubject<IProduct | null>(null);
   selectedProductChanges$ = this.selectedProductSource.asObservable();
 
   constructor(private http: HttpClient) {}
