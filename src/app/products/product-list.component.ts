@@ -22,16 +22,6 @@ export class ProductListComponent implements OnInit, AfterViewInit {
   filteredProducts: IProduct[];
   products: IProduct[];
 
-  // private _listFilter: string;
-  // get listFilter(): string {
-  //   return this._listFilter;
-  // }
-
-  // set listFilter(value: string) {
-  //   this._listFilter = value;
-  //   this.performFilter(this.listFilter);
-  // }
-
   constructor(private productService: ProductService) {}
 
   ngOnInit(): void {
@@ -47,6 +37,10 @@ export class ProductListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.parentListFilter = this.filterComponent.listFilter;
+  }
+
+  onValueChange(value: string): void {
+    this.performFilter(value);
   }
 
   toggleImage(): void {
