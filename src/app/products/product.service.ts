@@ -12,14 +12,27 @@ import { of } from "rxjs/observable/of";
 import { catchError, tap } from "rxjs/operators";
 
 import { IProduct } from "./product";
+import { Subject } from "rxjs";
 
 @Injectable()
 export class ProductService {
   private productsUrl = "api/products";
   private products: IProduct[];
-  currentProduct: IProduct | null;
+
+  // Subject is a specific type of observable which can notify various components
+  // Encapsulate it to ensure other components cannot change it
+  // Create a property which exposes the observable, which is read only
+  private selectedProductSource = new Subject<IProduct | null>();
+  selectedProductChanges$ = this.selectedProductSource.asObservable();
 
   constructor(private http: HttpClient) {}
+
+  changeSelectedProduct(selectedProduct: IProduct | null): void {
+    // Call the subject's next method to push the selected product
+    // into it's observable sequence
+    // The observable then broadcasts the notification passing along the selected product
+    this.selectedProductSource.next(selectedProduct);
+  }
 
   getProducts(): Observable<IProduct[]> {
     if (this.products) return of(this.products);
@@ -64,7 +77,7 @@ export class ProductService {
         const foundIndex = this.products.findIndex((item) => item.id === id);
         if (foundIndex > -1) {
           this.products.splice(foundIndex, 1);
-          this.currentProduct = null;
+          this.changeSelectedProduct(null);
         }
       }),
       catchError(this.handleError)
@@ -83,7 +96,7 @@ export class ProductService {
         tap((data) => console.log("createProduct: " + JSON.stringify(data))),
         tap((data) => {
           this.products.push(data);
-          this.currentProduct = data;
+          this.changeSelectedProduct(data);
         }),
         catchError(this.handleError)
       );

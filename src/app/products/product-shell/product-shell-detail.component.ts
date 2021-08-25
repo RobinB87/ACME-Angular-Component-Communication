@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ProductService } from "../product.service";
 import { IProduct } from "../product";
 
@@ -6,12 +6,17 @@ import { IProduct } from "../product";
   selector: "pm-product-shell-detail",
   templateUrl: "./product-shell-detail.component.html",
 })
-export class ProductShellDetailComponent {
+export class ProductShellDetailComponent implements OnInit {
   pageTitle: string = "Product Detail";
 
-  get product(): IProduct | null {
-    return this.productService.currentProduct;
-  }
+  product: IProduct | null;
 
   constructor(private productService: ProductService) {}
+
+  ngOnInit(): void {
+    // Start receiving notifications as soon as the component is initialized
+    this.productService.selectedProductChanges$.subscribe(
+      (selectedProduct) => (this.product = selectedProduct)
+    );
+  }
 }
