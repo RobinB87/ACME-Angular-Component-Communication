@@ -1,13 +1,8 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnInit,
-  ViewChild,
-} from "@angular/core";
+import { AfterViewInit, Component, OnInit, ViewChild } from "@angular/core";
 
 import { IProduct } from "./product";
 import { ProductService } from "./product.service";
+import { CriteriaComponent } from "./../shared/criteria/criteria.component";
 
 @Component({
   templateUrl: "./product-list.component.html",
@@ -15,8 +10,10 @@ import { ProductService } from "./product.service";
 })
 export class ProductListComponent implements OnInit, AfterViewInit {
   pageTitle: string = "Product List";
-
   showImage: boolean;
+  includeDetail: boolean = true;
+  @ViewChild(CriteriaComponent) filterComponent: CriteriaComponent;
+  parentListFilter: string;
 
   imageWidth: number = 50;
   imageMargin: number = 2;
@@ -25,19 +22,15 @@ export class ProductListComponent implements OnInit, AfterViewInit {
   filteredProducts: IProduct[];
   products: IProduct[];
 
-  @ViewChild("filterElement") filterElementRef: ElementRef;
-  // Can also use ViewChildren. This returns a QueryList
-  // Eg: use @ViewChild(NgModel) and it references all NgModel in the template
+  // private _listFilter: string;
+  // get listFilter(): string {
+  //   return this._listFilter;
+  // }
 
-  private _listFilter: string;
-  get listFilter(): string {
-    return this._listFilter;
-  }
-
-  set listFilter(value: string) {
-    this._listFilter = value;
-    this.performFilter(this.listFilter);
-  }
+  // set listFilter(value: string) {
+  //   this._listFilter = value;
+  //   this.performFilter(this.listFilter);
+  // }
 
   constructor(private productService: ProductService) {}
 
@@ -46,18 +39,14 @@ export class ProductListComponent implements OnInit, AfterViewInit {
     this.productService.getProducts().subscribe(
       (products: IProduct[]) => {
         this.products = products;
-        this.performFilter(this.listFilter);
+        this.performFilter(this.parentListFilter);
       },
       (error: any) => (this.errorMessage = <any>error)
     );
   }
 
-  // Considerations:
-  // This directly accesses the DOM (tightly coupled to the browser)
-  // Can pose a security threat (eg when accessing innerHtml)
   ngAfterViewInit(): void {
-    console.log("ngAfterViewInit");
-    this.filterElementRef.nativeElement.focus();
+    this.parentListFilter = this.filterComponent.listFilter;
   }
 
   toggleImage(): void {
